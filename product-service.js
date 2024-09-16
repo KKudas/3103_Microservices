@@ -8,9 +8,23 @@ let products = [];
 
 // POST /products: Add a new product.
 app.post("/products", (req, res) => {
-  const data = req.body;
-  products.push(data);
-  res.status(201).json(data);
+  try {
+    const data = req.body;
+
+    if (!data.prodName || !data.prodPrice) {
+      res.status(400).json({ error: "Missing parameters" });
+    }
+
+    const newData = {
+      productId: idCounter++,
+      ...data,
+    };
+
+    products.push(newData);
+    res.status(201).json(data);
+  } catch (error) {
+    res.status(500).json({ error: "There was an error adding a new product" });
+  }
 });
 
 // GET /products/:productId: Get product details by ID.
