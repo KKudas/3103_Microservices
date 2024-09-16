@@ -33,6 +33,7 @@ app.post("/orders", async (req, res) => {
         .json({ error: "Failed to retrieve product or customer id" });
     }
 
+    // Create the order only if the customer and product are valid.
     const data = req.body;
     orders.push(data);
     res.json(data);
@@ -40,9 +41,6 @@ app.post("/orders", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-
-// Create the order only if the customer and product are valid.
 
 // GET /orders/:orderId: Get order details.
 app.get("/orders/:orderId", (req, res) => {
@@ -57,8 +55,60 @@ app.get("/orders/:orderId", (req, res) => {
 });
 
 // PUT /orders/:orderId: Update an order.
+app.put("/orders/:orderId", async (req, res) => {
+  try {
+    const data = req.body;
+    const orderId = parseInt(req.params.orderId);
+    const index = orders.findIndex((order) => {
+      return order.orderId === orderId;
+    });
+
+    if (index !== -1) {
+      const productId = parseInt(req.body.productId);
+      const customerId = parseInt(req.body.customerId);
+
+      const productReq = await axios.get(
+        `http://localhost:3001/products/${productId}`
+      );
+      const customerReq = await axios.get(
+        `http://localhost:3002/customers/${customerId}`
+      );
+
+      const [customerRes, productRes] = await Promise.all([
+        customerReq,
+        productReq,
+      ]);
+
+      if (productRes.status !== 200 || customerRes.status !== 200) {
+        return res
+          .status(500)
+          .json({ error: "Failed to retrieve product or customer id" });
+      }
+
+      orders[index] = { ...orders[index], ...req.body };
+      res.status(200).json({ message: "Order successfully updated" });
+    } else {
+      res.status(404).json({ message: "Order not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // DELETE /orders/:orderId: Delete an order.
+app.delete("/orders/:orderId", (req, res) => {
+  const orderId = parseInt(req.params.orderId);
+  const index = orders.findIndex((order) => {
+    return order.orderId === orderId;
+  });
+
+  if (index !== -1) {
+    orders.splice(index, 1);
+    res.status(200).json({ message: "Order successfully deleted" });
+  } else {
+    res.status(404).json({ message: "Order not found" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Order service running on port ${port}`);
