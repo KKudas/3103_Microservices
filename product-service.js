@@ -10,10 +10,10 @@ let products = [];
 app.post("/products", (req, res) => {
   try {
     const data = req.body;
-    customers.push(data);
+    products.push(data);
     res.status(201).json(data);
   } catch (error) {
-    res.status(500).json({ error: "There was an error adding a new customer" });
+    res.status(500).json({ error: "There was an error adding a new product" });
   }
 });
 
