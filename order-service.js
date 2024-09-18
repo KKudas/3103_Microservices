@@ -44,13 +44,17 @@ app.post("/orders", async (req, res) => {
 
 // GET /orders/:orderId: Get order details.
 app.get("/orders/:orderId", (req, res) => {
-  const orderId = parseInt(req.params.orderId, 10);
-  const data = orders.find((order) => order.orderId === orderId);
+  try {
+    const orderId = parseInt(req.params.orderId, 10);
+    const data = orders.find((order) => order.orderId === orderId);
 
-  if (data) {
-    res.json(data);
-  } else {
-    res.status(404).json({ message: "Order not found" });
+    if (data) {
+      res.json(data);
+    } else {
+      res.status(404).json({ message: "Order not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -97,16 +101,20 @@ app.put("/orders/:orderId", async (req, res) => {
 
 // DELETE /orders/:orderId: Delete an order.
 app.delete("/orders/:orderId", (req, res) => {
-  const orderId = parseInt(req.params.orderId);
-  const index = orders.findIndex((order) => {
-    return order.orderId === orderId;
-  });
+  try {
+    const orderId = parseInt(req.params.orderId);
+    const index = orders.findIndex((order) => {
+      return order.orderId === orderId;
+    });
 
-  if (index !== -1) {
-    orders.splice(index, 1);
-    res.status(200).json({ message: "Order successfully deleted" });
-  } else {
-    res.status(404).json({ message: "Order not found" });
+    if (index !== -1) {
+      orders.splice(index, 1);
+      res.status(200).json({ message: "Order successfully deleted" });
+    } else {
+      res.status(404).json({ message: "Order not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
