@@ -10,68 +10,67 @@ let products = [];
 app.post("/products", (req, res) => {
   try {
     const data = req.body;
-
-    if (!data.prodName || !data.prodPrice) {
-      res.status(400).json({ error: "Missing parameters" });
-    }
-
-    const newData = {
-      productId: idCounter++,
-      ...data,
-    };
-
-    products.push(newData);
+    customers.push(data);
     res.status(201).json(data);
   } catch (error) {
-    res.status(500).json({ error: "There was an error adding a new product" });
+    res.status(500).json({ error: "There was an error adding a new customer" });
   }
 });
 
 // GET /products/:productId: Get product details by ID.
 app.get("/products/:productId", (req, res) => {
-  const productId = parseInt(req.params.productId, 10);
-  const item = products.find((product) => product.productId === productId);
+  try {
+    const productId = parseInt(req.params.productId, 10);
+    const item = products.find((product) => product.productId === productId);
 
-  if (item) {
-    res.json(item);
-  } else {
-    res.status(404).json({ message: "Product not found" });
+    if (item) {
+      res.json(item);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "There was an error fetching the product" });
   }
 });
 
 // PUT /products/:productId: Update a product.
 app.put("/products/:productId", (req, res) => {
-  const productId = parseInt(req.params.productId, 10);
-  const index = products.findIndex((product) => {
-    return product.productId === productId;
-  });
+  try {
+    const productId = parseInt(req.params.productId, 10);
+    const index = products.findIndex((product) => {
+      return product.productId === productId;
+    });
 
-  if (index !== -1) {
-    products[index] = { ...products[index], ...req.body };
-    res.status(200).json({ message: "Product successfully updated" });
-  } else {
-    res.status(404).json({ message: "Product not found" });
+    if (index !== -1) {
+      products[index] = { ...products[index], ...req.body };
+      res.status(200).json({ message: "Product successfully updated" });
+    } else {
+      res
+        .status(500)
+        .json({ error: "There was an error updating the product" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
 // DELETE /products/:productId: Delete a product.
 app.delete("/products/:productId", (req, res) => {
-  const productId = parseInt(req.params.productId, 10);
-  const index = products.findIndex((product) => {
-    return product.productId === productId;
-  });
+  try {
+    const productId = parseInt(req.params.productId, 10);
+    const index = products.findIndex((product) => {
+      return product.productId === productId;
+    });
 
-  if (index !== -1) {
-    products.splice(index, 1);
-    res.status(200).json({ message: "Product successfully deleted" });
-  } else {
-    res.status(404).json({ message: "Product not found" });
+    if (index !== -1) {
+      products.splice(index, 1);
+      res.status(200).json({ message: "Product successfully deleted" });
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "There was an error deleting the product" });
   }
-});
-
-//health check if online
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
 });
 
 app.listen(port, () => {
